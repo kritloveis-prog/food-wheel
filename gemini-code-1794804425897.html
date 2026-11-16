@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>วงล้อสุ่มเลือกอาหาร & ร้านโปรด</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue: #4285F4;
+      --red: #EA4335;
+      --yellow: #FBBC05;
+      --green: #34A853;
+      --bg: #F8FAFC;
+      --card: #FFFFFF;
+      --text: #1E293B;
+      --muted: #64748B;
+      --border: #E2E8F0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Prompt', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 18px;
+      width: 100%;
+      max-width: 1080px;
+    }
+
+    header h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    header p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 1080px;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 860px) {
+      .app-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border);
+    }
+
+    /* Mode Switcher */
+    .mode-bar {
+      display: flex;
+      background: #F1F5F9;
+      padding: 4px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+      gap: 4px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 10px 12px;
+      border-radius: 9px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .mode-btn.active {
+      background: var(--card);
+      color: var(--blue);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .filter-bar {
+      display: none;
+      margin-bottom: 14px;
+    }
+
+    .filter-bar.visible {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-bar label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      white-space: nowrap;
+      color: var(--muted);
+    }
+
+    select, input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.92rem;
+      color: var(--text);
+      background: #FFF;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    select:focus, input[type="text"]:focus {
+      border-color: var(--blue);
+    }
+
+    /* Wheel Area */
+    .wheel-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .wheel-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 440px;
+      aspect-ratio: 1 / 1;
+      margin: 8px auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    canvas#wheelCanvas {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14);
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    canvas#wheelCanvas:active {
+      transform: scale(0.99);
+    }
+
+    /* Top Needle Pointer */
+    .pointer {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 36px;
+      height: 44px;
+      z-index: 10;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.25));
+      pointer-events: none;
+    }
+
+    /* Center Hub */
+    .center-hub {
+      position: absolute;
+      width: 54px;
+      height: 54px;
+      background: #FFFFFF;
+      border-radius: 50%;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+      border: 4px solid #1E293B;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.75rem;
+      color: #1E293B;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .spin-btn {
+      width: 100%;
+      max-width: 320px;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--blue), #2563EB);
+      color: #FFFFFF;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(66, 133, 244, 0.35);
+      transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
+    }
+
+    .spin-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(66, 133, 244, 0.45);
+    }
+
+    .spin-btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .spin-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Management Tabs */
+    .manage-tabs {
+      display: flex;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 16px;
+      gap: 8px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      color: var(--blue);
+      border-bottom-color: var(--blue);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .add-btn {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 10px;
+      background: var(--green);
+      color: #FFF;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+
+    .add-btn:hover {
+      opacity: 0.9;
+    }
+
+    .item-list {
+      max-height: 360px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-right: 4px;
+    }
+
+    .list-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: #F8FAFC;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.92rem;
+      gap: 8px;
+    }
+
+    .item-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow: hidden;
+    }
+
+    .color-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .item-name {
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      background: #E2E8F0;
+      color: #475569;
+      padding: 2px 8px;
+      border-radius: 99px;
+      flex-shrink: 0;
+    }
+
+    .del-btn {
+      background: #FEE2E2;
+      color: var(--red);
+      border: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .del-btn:hover {
+      background: var(--red);
+      color: #FFF;
+    }
+
+    .footer-actions {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .reset-btn {
+      background: none;
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .reset-btn:hover {
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    /* Result Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-card {
+      background: #FFFFFF;
+      border-radius: 24px;
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      animation: popUp 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popUp {
+      from { transform: scale(0.85); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      background: #EFF6FF;
+      color: var(--blue);
+      margin-bottom: 10px;
+    }
+
+    .modal-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+      line-height: 1.3;
+    }
+
+    .restaurant-preview {
+      background: #F8FAFC;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 18px;
+      text-align: left;
+    }
+
+    .restaurant-preview h4 {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .chip-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip {
+      background: #FFF;
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-primary {
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      background: var(--green);
+      color: #FFF;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-secondary {
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      background: var(--blue);
+      color: #FFF;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-close {
+      padding: 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      background: #FFF;
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .empty-msg {
+      text-align: center;
+      padding: 24px 12px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🎡 วงล้อสุ่มเลือกอาหาร & ร้านโปรด</h1>
+    <p>คิดไม่ออกว่าจะกินอะไร ให้วงล้อช่วยตัดสินใจ! (บันทึกข้อมูลอัตโนมัติ)</p>
+  </header>
+
+  <main class="app-container">
+    <!-- Left Column: Spinner Wheel -->
+    <section class="card wheel-section">
+      <div class="mode-bar">
+        <button class="mode-btn active" id="modeCatBtn" onclick="setSpinMode('category')">🍽️ สุ่มหมวดอาหาร</button>
+        <button class="mode-btn" id="modeRestBtn" onclick="setSpinMode('restaurant')">🏪 สุ่มร้านอาหาร</button>
+      </div>
+
+      <div class="filter-bar" id="restFilterBar">
+        <label for="wheelCatFilter">เลือกหมวด:</label>
+        <select id="wheelCatFilter" onchange="onWheelFilterChange()"></select>
+      </div>
+
+      <div class="wheel-wrapper">
+        <svg class="pointer" viewBox="0 0 40 50">
+          <path d="M20 48 L4 12 C2 6 6 2 12 2 L28 2 C34 2 38 6 36 12 Z" fill="#1E293B" stroke="#FFFFFF" stroke-width="3"/>
+        </svg>
+        <canvas id="wheelCanvas" width="700" height="700" onclick="spinWheel()"></canvas>
+        <div class="center-hub">สุ่มเลย</div>
+      </div>
+
+      <button class="spin-btn" id="spinBtn" onclick="spinWheel()">🎲 หมุนวงล้อ!</button>
+    </section>
+
+    <!-- Right Column: Category & Restaurant Manager -->
+    <section class="card">
+      <div class="manage-tabs">
+        <button class="tab-btn active" id="tabCatBtn" onclick="switchManageTab('categories')">1. หมวดหมู่อาหาร</button>
+        <button class="tab-btn" id="tabRestBtn" onclick="switchManageTab('restaurants')">2. จัดการร้านอาหาร</button>
+      </div>
+
+      <!-- Tab 1: Manage Categories -->
+      <div class="tab-content active" id="tabCategories">
+        <div class="input-group">
+          <input type="text" id="newCatInput" placeholder="เพิ่มหมวดอาหาร เช่น ก๋วยเตี๋ยวเรือ, คาเฟ่..." onkeypress="if(event.key==='Enter') addCategory()" />
+          <button class="add-btn" onclick="addCategory()">+ เพิ่ม</button>
+        </div>
+        <div class="item-list" id="categoryList"></div>
+      </div>
+
+      <!-- Tab 2: Manage Restaurants -->
+      <div class="tab-content" id="tabRestaurants">
+        <div style="margin-bottom: 10px;">
+          <select id="manageCatSelect" onchange="renderRestaurantList()"></select>
+        </div>
+        <div class="input-group">
+          <input type="text" id="newRestInput" placeholder="เพิ่มชื่อร้านอาหารในหมวดนี้..." onkeypress="if(event.key==='Enter') addRestaurant()" />
+          <button class="add-btn" onclick="addRestaurant()">+ เพิ่มร้าน</button>
+        </div>
+        <div class="item-list" id="restaurantList"></div>
+      </div>
+
+      <div class="footer-actions">
+        <span>💾 บันทึกข้อมูลลงเครื่องอัตโนมัติ</span>
+        <button class="reset-btn" onclick="resetDefaults()">รีเซ็ตค่าเริ่มต้น</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Winner Result Modal -->
+  <div class="modal-overlay" id="resultModal" onclick="if(event.target===this) closeModal()">
+    <div class="modal-card">
+      <span class="modal-tag" id="modalTag">ผลการสุ่มหมวดอาหาร</span>
+      <h2 class="modal-title" id="modalTitle">อาหารญี่ปุ่น</h2>
+      <div class="restaurant-preview" id="modalRestBox" style="display:none;">
+        <h4>🏪 ร้านอาหารที่บันทึกไว้ในหมวดนี้:</h4>
+        <div class="chip-wrap" id="modalRestChips"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-primary" id="spinSubRestBtn" style="display:none;" onclick="spinRestaurantsInWinner()">🎯 สุ่มเลือกร้านในหมวดนี้ต่อ!</button>
+        <button class="btn-secondary" onclick="closeModal(); spinWheel();">🔄 หมุนอีกครั้ง</button>
+        <button class="btn-close" onclick="closeModal()">ปิดหน้าต่าง</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const PALETTE = ["#4285F4", "#EA4335", "#FBBC05", "#34A853"];
+    const STORAGE_KEY = "food_wheel_data_v2";
+
+    const DEFAULT_DATA = [
+      { id: "c1", name: "อาหารตามสั่ง", restaurants: ["ร้านป้าณีตามสั่ง", "ครัวลุงหนวด", "กะเพราถาดยักษ์"] },
+      { id: "c2", name: "ก๋วยเตี๋ยว", restaurants: ["ก๋วยเตี๋ยวเรือท่าสยาม", "บะหมี่เกี๊ยวปากซอย", "เย็นตาโฟเจ้าเก่า"] },
+      { id: "c3", name: "อาหารญี่ปุ่น", restaurants: ["Sushiro", "Katsuya", "Oishi Ramen", "Yayoi"] },
+      { id: "c4", name: "ชาบู / ปิ้งย่าง", restaurants: ["สุกี้ตี๋น้อย", "MK Restaurants", "Bar B Q Plaza", "Mo-Mo-Paradise"] },
+      { id: "c5", name: "ส้มตำ / อาหารอีสาน", restaurants: ["ส้มตำนัว", "ลาบเป็ดอุดร", "แซ่บวันรัชดา"] },
+      { id: "c6", name: "อาหารเกาหลี", restaurants: ["Bonchon", "Gugu Chicken", "Sukishi"] },
+      { id: "c7", name: "ฟาสต์ฟู้ด / เบอร์เกอร์", restaurants: ["McDonald's", "KFC", "Burger King", "Mos Burger"] },
+      { id: "c8", name: "ข้าวมันไก่ / ข้าวหมูแดง", restaurants: ["ข้าวมันไก่ตอนประตูน้ำ", "หมูแดงนายไซ"] },
+      { id: "c9", name: "อาหารอิตาเลียน / พิซซ่า", restaurants: ["The Pizza Company", "Pizza Hut", "Saizeriya"] },
+      { id: "c10", name: "อาหารคลีน / สลัด", restaurants: ["โอ้กะจู๋", "Jones' Salad", "Sizzler"] },
+      { id: "c11", name: "ข้าวแกง / อาหารใต้", restaurants: ["ข้าวแกงปักษ์ใต้", "คั่วกลิ้งผักสด"] },
+      { id: "c12", name: "ซีฟู้ด / อาหารทะเล", restaurants: ["แหลมเจริญซีฟู้ด", "อบอร่อย", "สมบูรณ์โภชนา"] }
+    ];
+
+    let appData = [];
+    let spinMode = "category"; // "category" | "restaurant"
+    let selectedFilterCatId = "ALL";
+    let currentAngle = 0;
+    let isSpinning = false;
+    let lastWinnerCategory = null;
+
+    const canvas = document.getElementById("wheelCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // Load & Save LocalStorage
+    function loadData() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            appData = parsed;
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn("LocalStorage read error:", e);
+      }
+      appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    }
+
+    function saveData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+      } catch (e) {
+        console.warn("LocalStorage write error:", e);
+      }
+    }
+
+    // Get active slices for the wheel
+    function getWheelSlices() {
+      if (spinMode === "category") {
+        return appData.map((cat, idx) => ({
+          label: cat.name,
+          categoryId: cat.id,
+          color: PALETTE[idx % PALETTE.length]
+        }));
+      } else {
+        let list = [];
+        if (selectedFilterCatId === "ALL") {
+          appData.forEach(cat => {
+            cat.restaurants.forEach(r => {
+              list.push({ label: r, categoryName: cat.name });
+            });
+          });
+        } else {
+          const cat = appData.find(c => c.id === selectedFilterCatId);
+          if (cat) {
+            cat.restaurants.forEach(r => {
+              list.push({ label: r, categoryName: cat.name });
+            });
+          }
+        }
+        return list.map((item, idx) => ({
+          ...item,
+          color: PALETTE[idx % PALETTE.length]
+        }));
+      }
+    }
+
+    // Smart multi-line text wrapper so words never crowd the wheel center
+    function splitTextLines(text) {
+      const clean = text.trim();
+      if (clean.includes("/")) {
+        const parts = clean.split("/").map(s => s.trim()).filter(Boolean);
+        if (parts.length >= 2) return [parts[0] + " /", parts.slice(1).join(" / ")];
+      }
+      if (clean.includes(" ")) {
+        const parts = clean.split(" ").filter(Boolean);
+        if (parts.length >= 2) {
+          const mid = Math.ceil(parts.length / 2);
+          return [parts.slice(0, mid).join(" "), parts.slice(mid).join(" ")];
+        }
+      }
+      if (clean.length > 13) {
+        const mid = Math.ceil(clean.length / 2);
+        return [clean.slice(0, mid), clean.slice(mid)];
+      }
+      return [clean];
+    }
+
+    // Render Canvas Wheel
+    function drawWheel() {
+      const slices = getWheelSlices();
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const radius = cx - 14;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Outer white rim
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius + 10, 0, Math.PI * 2);
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fill();
+
+      if (slices.length === 0) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.fillStyle = "#E2E8F0";
+        ctx.fill();
+        ctx.fillStyle = "#475569";
+        ctx.font = "600 26px 'Prompt', sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("ยังไม่มีรายการในหมวดนี้", cx, cy - 18);
+        ctx.font = "400 20px 'Prompt', sans-serif";
+        ctx.fillText("กรุณาเพิ่มร้านอาหารทางด้านขวา/ด้านล่าง", cx, cy + 20);
+        return;
+      }
+
+      const arc = (Math.PI * 2) / slices.length;
+
+      slices.forEach((slice, i) => {
+        const startAngle = currentAngle + i * arc;
+        const endAngle = startAngle + arc;
+
+        // Draw wedge
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, radius, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = slice.color;
+        ctx.fill();
+
+        // Crisp divider border
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "#FFFFFF";
+        ctx.stroke();
+
+        // Draw text
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(startAngle + arc / 2);
+
+        // Contrast text color: dark charcoal on Yellow (#FBBC05), white on Blue/Red/Green
+        ctx.fillStyle = slice.color === "#FBBC05" ? "#1E293B" : "#FFFFFF";
+        ctx.textAlign = "right";
+        ctx.textBaseline = "middle";
+
+        const lines = splitTextLines(slice.label);
+        const fontSize = slices.length > 14 ? 19 : slices.length > 10 ? 22 : 25;
+        ctx.font = `600 ${fontSize}px 'Prompt', sans-serif`;
+
+        const textRadius = radius - 26;
+        if (lines.length === 1) {
+          ctx.fillText(lines[0], textRadius, 0);
+        } else {
+          const lineHeight = fontSize + 5;
+          ctx.fillText(lines[0], textRadius, -lineHeight / 2);
+          ctx.fillText(lines[1], textRadius, lineHeight / 2);
+        }
+
+        ctx.restore();
+      });
+    }
+
+    // Spin Animation Physics
+    function spinWheel() {
+      if (isSpinning) return;
+      const slices = getWheelSlices();
+      if (slices.length === 0) {
+        alert("ยังไม่มีรายการให้สุ่ม กรุณาเพิ่มรายการก่อนครับ");
+        return;
+      }
+
+      isSpinning = true;
+      document.getElementById("spinBtn").disabled = true;
+
+      const extraSpins = 5 + Math.random() * 4; // 5 to 9 full turns
+      const randomOffset = Math.random() * Math.PI * 2;
+      const totalRotation = extraSpins * Math.PI * 2 + randomOffset;
+      const duration = 4200; // 4.2 seconds
+      const startAngle = currentAngle;
+      const startTime = performance.now();
+
+      function animate(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // Cubic ease-out deceleration
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        currentAngle = (startAngle + totalRotation * easeOut) % (Math.PI * 2);
+        drawWheel();
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          isSpinning = false;
+          document.getElementById("spinBtn").disabled = false;
+          determineWinner(slices);
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    function determineWinner(slices) {
+      const arc = (Math.PI * 2) / slices.length;
+      // Top needle is at -Math.PI / 2 (12 o'clock)
+      const pointerAngle = (Math.PI * 1.5 - currentAngle) % (Math.PI * 2);
+      const normalizedAngle = (pointerAngle + Math.PI * 2) % (Math.PI * 2);
+      const winningIndex = Math.floor(normalizedAngle / arc) % slices.length;
+      const winner = slices[winningIndex];
+
+      showResultModal(winner);
+    }
+
+    function showResultModal(winner) {
+      const modal = document.getElementById("resultModal");
+      const tag = document.getElementById("modalTag");
+      const title = document.getElementById("modalTitle");
+      const restBox = document.getElementById("modalRestBox");
+      const restChips = document.getElementById("modalRestChips");
+      const subBtn = document.getElementById("spinSubRestBtn");
+
+      if (spinMode === "category") {
+        const cat = appData.find(c => c.id === winner.categoryId);
+        lastWinnerCategory = cat;
+        tag.textContent = "🎉 หมวดอาหารที่สุ่มได้คือ";
+        title.textContent = winner.label;
+
+        if (cat && cat.restaurants && cat.restaurants.length > 0) {
+          restBox.style.display = "block";
+          restChips.innerHTML = cat.restaurants
+            .map(r => `<span class="chip">🏪 ${escapeHtml(r)}</span>`)
+            .join("");
+          subBtn.style.display = "block";
+          subBtn.textContent = `🎯 สุ่มเลือกร้านในหมวด "${cat.name}" ต่อ!`;
+        } else {
+          restBox.style.display = "none";
+          subBtn.style.display = "none";
+        }
+      } else {
+        tag.textContent = `🏪 ร้านที่สุ่มได้ (${winner.categoryName})`;
+        title.textContent = winner.label;
+        restBox.style.display = "none";
+        subBtn.style.display = "none";
+      }
+
+      modal.classList.add("open");
+    }
+
+    function closeModal() {
+      document.getElementById("resultModal").classList.remove("open");
+    }
+
+    function spinRestaurantsInWinner() {
+      if (!lastWinnerCategory) return;
+      closeModal();
+      setSpinMode("restaurant", lastWinnerCategory.id);
+      setTimeout(() => spinWheel(), 250);
+    }
+
+    // Mode & Filter Controls
+    function setSpinMode(mode, filterCatId = null) {
+      spinMode = mode;
+      document.getElementById("modeCatBtn").classList.toggle("active", mode === "category");
+      document.getElementById("modeRestBtn").classList.toggle("active", mode === "restaurant");
+
+      const filterBar = document.getElementById("restFilterBar");
+      if (mode === "restaurant") {
+        filterBar.classList.add("visible");
+        populateWheelFilterSelect();
+        if (filterCatId) {
+          selectedFilterCatId = filterCatId;
+          document.getElementById("wheelCatFilter").value = filterCatId;
+        }
+      } else {
+        filterBar.classList.remove("visible");
+      }
+
+      drawWheel();
+    }
+
+    function onWheelFilterChange() {
+      selectedFilterCatId = document.getElementById("wheelCatFilter").value;
+      drawWheel();
+    }
+
+    function populateWheelFilterSelect() {
+      const sel = document.getElementById("wheelCatFilter");
+      const prev = sel.value || selectedFilterCatId;
+      let html = `<option value="ALL">รวมทุกร้านอาหารทุกหมวด (${appData.reduce((s, c) => s + c.restaurants.length, 0)} ร้าน)</option>`;
+      appData.forEach(c => {
+        html += `<option value="${c.id}">${escapeHtml(c.name)} (${c.restaurants.length} ร้าน)</option>`;
+      });
+      sel.innerHTML = html;
+      if ([...sel.options].some(o => o.value === prev)) {
+        sel.value = prev;
+      } else {
+        selectedFilterCatId = "ALL";
+        sel.value = "ALL";
+      }
+    }
+
+    // Management UI
+    function switchManageTab(tab) {
+      document.getElementById("tabCatBtn").classList.toggle("active", tab === "categories");
+      document.getElementById("tabRestBtn").classList.toggle("active", tab === "restaurants");
+      document.getElementById("tabCategories").classList.toggle("active", tab === "categories");
+      document.getElementById("tabRestaurants").classList.toggle("active", tab === "restaurants");
+
+      if (tab === "restaurants") {
+        populateManageCatSelect();
+        renderRestaurantList();
+      }
+    }
+
+    function renderCategoryList() {
+      const listEl = document.getElementById("categoryList");
+      if (appData.length === 0) {
+        listEl.innerHTML = `<div class="empty-msg">ยังไม่มีหมวดหมู่อาหาร กรุณาเพิ่มด้านบน</div>`;
+        return;
+      }
+
+      listEl.innerHTML = appData.map((cat, idx) => {
+        const color = PALETTE[idx % PALETTE.length];
+        return `
+          <div class="list-item">
+            <div class="item-info">
+              <span class="color-dot" style="background:${color}"></span>
+              <span class="item-name">${escapeHtml(cat.name)}</span>
+              <span class="badge">${cat.restaurants.length} ร้าน</span>
+            </div>
+            <button class="del-btn" title="ลบหมวดนี้" onclick="deleteCategory('${cat.id}')">✕</button>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function addCategory() {
+      const input = document.getElementById("newCatInput");
+      const name = input.value.trim();
+      if (!name) return;
+
+      const newCat = {
+        id: "cat_" + Date.now(),
+        name: name,
+        restaurants: []
+      };
+      appData.push(newCat);
+      input.value = "";
+      saveData();
+      renderAll();
+    }
+
+    function deleteCategory(id) {
+      if (appData.length <= 2) {
+        alert("ควรมีหมวดหมู่อาหารอย่างน้อย 2 รายการบนวงล้อครับ");
+        return;
+      }
+      appData = appData.filter(c => c.id !== id);
+      saveData();
+      renderAll();
+    }
+
+    function populateManageCatSelect() {
+      const sel = document.getElementById("manageCatSelect");
+      const prev = sel.value;
+      sel.innerHTML = appData.map(c =>
+        `<option value="${c.id}">หมวด: ${escapeHtml(c.name)} (${c.restaurants.length} ร้าน)</option>`
+      ).join("");
+      if (prev && appData.some(c => c.id === prev)) {
+        sel.value = prev;
+      }
+    }
+
+    function renderRestaurantList() {
+      const sel = document.getElementById("manageCatSelect");
+      const catId = sel.value;
+      const cat = appData.find(c => c.id === catId);
+      const listEl = document.getElementById("restaurantList");
+
+      if (!cat || cat.restaurants.length === 0) {
+        listEl.innerHTML = `<div class="empty-msg">ยังไม่มีร้านอาหารในหมวดนี้<br>พิมพ์ชื่อร้านด้านบนแล้วกด "+ เพิ่มร้าน" ได้เลย</div>`;
+        return;
+      }
+
+      listEl.innerHTML = cat.restaurants.map((rest, idx) => {
+        const color = PALETTE[idx % PALETTE.length];
+        return `
+          <div class="list-item">
+            <div class="item-info">
+              <span class="color-dot" style="background:${color}"></span>
+              <span class="item-name">${escapeHtml(rest)}</span>
+            </div>
+            <button class="del-btn" title="ลบร้านนี้" onclick="deleteRestaurant('${cat.id}', ${idx})">✕</button>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function addRestaurant() {
+      const sel = document.getElementById("manageCatSelect");
+      const input = document.getElementById("newRestInput");
+      const cat = appData.find(c => c.id === sel.value);
+      const restName = input.value.trim();
+      if (!cat || !restName) return;
+
+      cat.restaurants.push(restName);
+      input.value = "";
+      saveData();
+      renderAll();
+      sel.value = cat.id;
+      renderRestaurantList();
+    }
+
+    function deleteRestaurant(catId, restIndex) {
+      const cat = appData.find(c => c.id === catId);
+      if (!cat) return;
+      cat.restaurants.splice(restIndex, 1);
+      saveData();
+      renderAll();
+      document.getElementById("manageCatSelect").value = catId;
+      renderRestaurantList();
+    }
+
+    function resetDefaults() {
+      if (confirm("ต้องการรีเซ็ตหมวดอาหารและร้านอาหารทั้งหมดกลับเป็นค่าเริ่มต้นใช่หรือไม่?")) {
+        appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+        saveData();
+        renderAll();
+      }
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[m]));
+    }
+
+    function renderAll() {
+      renderCategoryList();
+      populateManageCatSelect();
+      renderRestaurantList();
+      populateWheelFilterSelect();
+      drawWheel();
+    }
+
+    // Initialize
+    loadData();
+    renderAll();
+  </script>
+</body>
+</html>
