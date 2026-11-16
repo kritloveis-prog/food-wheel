@@ -789,4 +789,799 @@
             <select id="managerCatSelect" onchange="renderManagerList()"></select>
           </div>
           <form class="add-form" onsubmit="addRestaurant(event)">
-            <input type="text" id="newRestInput" placeholder="พิมพ์ชื่อร้าน
+            <input type="text" id="newRestInput" placeholder="พิมพ์ชื่อร้านอาหาร เช่น สุกี้ตี๋น้อย..." required />
+            <button type="submit" class="btn-add">+ เพิ่มร้าน</button>
+          </form>
+        </div>
+
+        <!-- Tab: Manage Categories -->
+        <div id="manageCatSection" style="display: none;">
+          <form class="add-form" onsubmit="addCategory(event)">
+            <input type="text" id="newCatInput" placeholder="เพิ่มหมวดอาหาร เช่น อาหารเวียดนาม..." required />
+            <button type="submit" class="btn-add">+ เพิ่มหมวด</button>
+          </form>
+        </div>
+
+        <div class="item-list" id="itemList"></div>
+
+        <div class="panel-footer">
+          <span>บันทึกอัตโนมัติ (LocalStorage)</span>
+          <button class="btn-reset" onclick="resetDefaults()">รีเซ็ตค่าเริ่มต้น</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- VIEW 2: BILL SPLITTER -->
+  <section class="view-section" id="billView">
+    <div class="bill-grid">
+      <!-- Left: Input Controls -->
+      <div class="card">
+        <div class="mode-switch">
+          <button class="mode-btn active" id="splitEqualBtn" onclick="setSplitMode('equal')">หารเท่ากันทุกคน</button>
+          <button class="mode-btn" id="splitItemBtn" onclick="setSplitMode('itemized')">แยกตามรายการสั่ง</button>
+        </div>
+
+        <div class="form-group">
+          <label for="billShopName">ชื่อร้าน / มื้ออาหาร (ไม่บังคับ)</label>
+          <input type="text" id="billShopName" placeholder="เช่น สุกี้ตี๋น้อย, มื้อเที่ยงออฟฟิศ..." oninput="calculateBill()" />
+        </div>
+
+        <!-- Tax & Service Charge Options -->
+        <div class="tax-toggles">
+          <label class="toggle-pill">
+            <input type="checkbox" id="chkService" onchange="calculateBill()" />
+            Service Charge 10%
+          </label>
+          <label class="toggle-pill">
+            <input type="checkbox" id="chkVat" onchange="calculateBill()" />
+            VAT 7%
+          </label>
+        </div>
+
+        <!-- Mode A: Equal Split -->
+        <div id="equalSplitPanel">
+          <div class="form-group">
+            <label for="equalSubtotal">ยอดค่าอาหารรวม (บาท)</label>
+            <input type="number" id="equalSubtotal" min="0" step="any" placeholder="0.00" oninput="calculateBill()" />
+          </div>
+
+          <div class="form-group">
+            <label>จำนวนผู้ใช้บริการ (คน)</label>
+            <div class="people-counter">
+              <button type="button" class="counter-btn" onclick="changeEqualPeople(-1)">-</button>
+              <span class="counter-val" id="equalPeopleCount">2</span>
+              <button type="button" class="counter-btn" onclick="changeEqualPeople(1)">+</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mode B: Itemized Split -->
+        <div id="itemizedSplitPanel" style="display: none;">
+          <div class="form-group">
+            <label>1. รายชื่อผู้ร่วมโต๊ะ (<span id="dinerCountLabel">2</span> คน)</label>
+            <form class="add-form" onsubmit="addDiner(event)">
+              <input type="text" id="newDinerInput" placeholder="เพิ่มชื่อเพื่อน เช่น บอย, แนน..." required />
+              <button type="submit" class="btn-add">+ เพิ่มคน</button>
+            </form>
+            <div class="people-tags" id="dinerTagsList"></div>
+          </div>
+
+          <div class="form-group">
+            <label>2. เพิ่มรายการอาหาร / เครื่องดื่ม</label>
+            <form class="add-form" onsubmit="addDish(event)">
+              <input type="text" id="dishNameInput" placeholder="ชื่อเมนู" style="flex: 1.4;" required />
+              <input type="number" id="dishPriceInput" min="0" step="any" placeholder="ราคา" style="flex: 0.8;" required />
+              <button type="submit" class="btn-add">+ เพิ่ม</button>
+            </form>
+          </div>
+
+          <div id="dishListContainer" style="max-height: 320px; overflow-y: auto;"></div>
+        </div>
+      </div>
+
+      <!-- Right: Summary Result -->
+      <div class="card">
+        <div class="section-title">
+          <span>สรุปยอดค่าใช้จ่าย</span>
+          <button class="btn-reset" onclick="resetBill()">ล้างบิลใหม่</button>
+        </div>
+
+        <div class="summary-highlight">
+          <div class="label" id="summaryMainLabel">ยอดหารเฉลี่ยต่อคน</div>
+          <div class="amount" id="summaryMainAmount">0.00 ฿</div>
+          <div class="sub" id="summaryTotalSub">ยอดสุทธิรวมทั้งบิล: 0.00 ฿</div>
+        </div>
+
+        <div id="billBreakdownArea"></div>
+
+        <button class="copy-btn" id="copyBillBtn" onclick="copyBillSummary()">คัดลอกสรุปบิลส่งให้เพื่อน</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Result Modal -->
+  <div class="modal-backdrop" id="resultModal" onclick="closeModalOnBackdrop(event)">
+    <div class="modal-card">
+      <span class="modal-tag" id="modalTag">ผลการสุ่มหมวดอาหาร</span>
+      <div class="modal-result" id="modalTitle">อาหารญี่ปุ่น</div>
+
+      <div class="saved-restaurants-box" id="modalRestBox">
+        <h4>ร้านอาหารที่บันทึกไว้ในหมวดนี้:</h4>
+        <div class="restaurant-chips" id="modalRestChips"></div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-primary-modal" id="spinSubRestBtn" onclick="spinRestaurantsInWinner()">
+          สุ่มร้านในหมวดนี้ต่อ!
+        </button>
+        <button class="btn-secondary-modal" onclick="sendWinnerToBill()">
+          นำชื่อร้านไปคำนวณบิล
+        </button>
+        <button class="btn-secondary-modal" onclick="closeModal()">ปิดหน้าต่าง / หมุนใหม่</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const PALETTE = ['#4285F4', '#EA4335', '#FBBC05', '#34A853'];
+    const STORAGE_KEY = 'thai_food_wheel_v2';
+
+    const DEFAULT_DATA = [
+      { id: 'cat-1', name: 'อาหารตามสั่ง', restaurants: ['ร้านป้าณี', 'ครัวลุงหนวด'] },
+      { id: 'cat-2', name: 'ก๋วยเตี๋ยว', restaurants: ['ก๋วยเตี๋ยวเรือท่าสยาม', 'บะหมี่เกี๊ยวปากซอย'] },
+      { id: 'cat-3', name: 'อาหารญี่ปุ่น', restaurants: ['Sushiro', 'Katsuya', 'Oishi'] },
+      { id: 'cat-4', name: 'ชาบู / ปิ้งย่าง', restaurants: ['ตี๋น้อย', 'MK', 'Bar B Q Plaza'] },
+      { id: 'cat-5', name: 'ส้มตำ / อาหารอีสาน', restaurants: ['นิตยาไก่ย่าง', 'ส้มตำนัว'] },
+      { id: 'cat-6', name: 'อาหารเกาหลี', restaurants: ['Bonchon', 'Gugu Chicken'] },
+      { id: 'cat-7', name: 'ฟาสต์ฟู้ด / เบอร์เกอร์', restaurants: ["McDonald's", 'Burger King'] },
+      { id: 'cat-8', name: 'ข้าวมันไก่ / ข้าวหมูแดง', restaurants: ['ข้าวมันไก่ตอนประตูน้ำ', 'หมูแดงนายไซ'] },
+      { id: 'cat-9', name: 'อาหารอิตาเลียน / พิซซ่า', restaurants: ['The Pizza Company', 'Wine Connection'] },
+      { id: 'cat-10', name: 'อาหารคลีน / สลัด', restaurants: ['โอ้กะจู๋', 'Salad Factory'] },
+      { id: 'cat-11', name: 'ข้าวแกง / อาหารใต้', restaurants: ['ครัวคุณอิ๊ด', 'ข้าวแกงปักษ์ใต้'] },
+      { id: 'cat-12', name: 'ซีฟู้ด / อาหารทะเล', restaurants: ['สมบูรณ์โภชนา', 'อบอร่อย'] }
+    ];
+
+    let state = {
+      categories: [],
+      spinMode: 'category',
+      activeFilterCatId: 'all',
+      managerTab: 'restaurant',
+      managerCatId: 'cat-1'
+    };
+
+    let currentRotation = 0;
+    let isSpinning = false;
+    let winningCategoryObj = null;
+    let lastWinnerLabel = '';
+
+    // Bill Splitter State
+    let billState = {
+      splitMode: 'equal', // 'equal' | 'itemized'
+      equalPeople: 2,
+      diners: [
+        { id: 'd1', name: 'คนที่ 1' },
+        { id: 'd2', name: 'คนที่ 2' }
+      ],
+      dishes: [] // { id, name, price, sharedBy: ['d1', 'd2'] }
+    };
+
+    const canvas = document.getElementById('wheelCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function switchMainView(view) {
+      document.getElementById('navWheelBtn').classList.toggle('active', view === 'wheel');
+      document.getElementById('navBillBtn').classList.toggle('active', view === 'bill');
+      document.getElementById('wheelView').classList.toggle('active', view === 'wheel');
+      document.getElementById('billView').classList.toggle('active', view === 'bill');
+      if (view === 'bill') calculateBill();
+    }
+
+    function sendWinnerToBill() {
+      closeModal();
+      if (lastWinnerLabel) {
+        document.getElementById('billShopName').value = lastWinnerLabel;
+      }
+      switchMainView('bill');
+    }
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed.categories) && parsed.categories.length > 0) {
+            state.categories = parsed.categories;
+            state.managerCatId = state.categories[0].id;
+            return;
+          }
+        }
+      } catch (e) {}
+      state.categories = JSON.parse(JSON.stringify(DEFAULT_DATA));
+      state.managerCatId = state.categories[0].id;
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ categories: state.categories }));
+      } catch (e) {}
+    }
+
+    function getWheelItems() {
+      if (state.spinMode === 'category') {
+        return state.categories.map(c => ({ label: c.name, categoryId: c.id }));
+      } else {
+        let list = [];
+        if (state.activeFilterCatId === 'all') {
+          state.categories.forEach(c => {
+            c.restaurants.forEach(r => list.push({ label: r, categoryId: c.id, categoryName: c.name }));
+          });
+        } else {
+          const cat = state.categories.find(c => c.id === state.activeFilterCatId);
+          if (cat) {
+            cat.restaurants.forEach(r => list.push({ label: r, categoryId: cat.id, categoryName: cat.name }));
+          }
+        }
+        return list.length > 0 ? list : [{ label: 'ยังไม่มีร้านอาหาร', empty: true }];
+      }
+    }
+
+    function wrapTextLines(text) {
+      if (text.includes(' / ')) {
+        const parts = text.split(' / ');
+        return [parts[0] + ' /', parts.slice(1).join(' / ')];
+      }
+      if (text.includes(' ')) {
+        const words = text.split(' ');
+        if (words.length >= 2 && text.length > 10) {
+          const mid = Math.ceil(words.length / 2);
+          return [words.slice(0, mid).join(' '), words.slice(mid).join(' ')];
+        }
+      }
+      if (text.length > 13) {
+        const mid = Math.ceil(text.length / 2);
+        return [text.slice(0, mid), text.slice(mid)];
+      }
+      return [text];
+    }
+
+    function drawWheel() {
+      const items = getWheelItems();
+      const total = items.length;
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const radius = cx - 8;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (total === 0) return;
+
+      const arc = (2 * Math.PI) / total;
+
+      items.forEach((item, i) => {
+        const startAngle = currentRotation + i * arc;
+        const endAngle = startAngle + arc;
+        const bgColor = item.empty ? '#CBD5E1' : PALETTE[i % PALETTE.length];
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, radius, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = bgColor;
+        ctx.fill();
+
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(startAngle + arc / 2);
+
+        const isYellow = bgColor === '#FBBC05';
+        ctx.fillStyle = item.empty ? '#334155' : (isYellow ? '#1F2937' : '#FFFFFF');
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+
+        const fontSize = total > 14 ? 20 : (total > 10 ? 23 : 26);
+        ctx.font = `600 ${fontSize}px 'Prompt', sans-serif`;
+
+        const lines = wrapTextLines(item.label);
+        const textRadius = radius - 26;
+        const lineHeight = fontSize * 1.22;
+
+        if (lines.length === 1) {
+          ctx.fillText(lines[0], textRadius, 0, radius * 0.62);
+        } else {
+          ctx.fillText(lines[0], textRadius, -lineHeight / 2, radius * 0.62);
+          ctx.fillText(lines[1], textRadius, lineHeight / 2, radius * 0.62);
+        }
+
+        ctx.restore();
+      });
+    }
+
+    function spinWheel() {
+      if (isSpinning) return;
+      const items = getWheelItems();
+      if (items.length === 0 || items[0].empty) {
+        alert('กรุณาเพิ่มรายการก่อนหมุนวงล้อครับ');
+        return;
+      }
+
+      isSpinning = true;
+      document.getElementById('spinBtn').disabled = true;
+
+      const extraSpins = (5 + Math.random() * 4) * 2 * Math.PI;
+      const randomOffset = Math.random() * 2 * Math.PI;
+      const targetRotation = currentRotation + extraSpins + randomOffset;
+      const startRotation = currentRotation;
+      const duration = 4200;
+      const startTime = performance.now();
+
+      const arc = (2 * Math.PI) / items.length;
+      let lastSliceIndex = -1;
+      const pointerEl = document.getElementById('pointer');
+
+      function animate(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        currentRotation = startRotation + (targetRotation - startRotation) * easeOut;
+
+        drawWheel();
+
+        const pointerAngle = (1.5 * Math.PI - (currentRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+        const currentSlice = Math.floor(pointerAngle / arc) % items.length;
+        if (currentSlice !== lastSliceIndex) {
+          lastSliceIndex = currentSlice;
+          pointerEl.classList.add('tick');
+          setTimeout(() => pointerEl.classList.remove('tick'), 65);
+        }
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          isSpinning = false;
+          document.getElementById('spinBtn').disabled = false;
+          showWinner(items[currentSlice]);
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    function showWinner(winnerItem) {
+      const modal = document.getElementById('resultModal');
+      const tagEl = document.getElementById('modalTag');
+      const titleEl = document.getElementById('modalTitle');
+      const restBox = document.getElementById('modalRestBox');
+      const chipsEl = document.getElementById('modalRestChips');
+      const nextBtn = document.getElementById('spinSubRestBtn');
+
+      lastWinnerLabel = winnerItem.label;
+      titleEl.textContent = winnerItem.label;
+
+      if (state.spinMode === 'category') {
+        tagEl.textContent = 'หมวดอาหารที่สุ่มได้';
+        const cat = state.categories.find(c => c.id === winnerItem.categoryId);
+        winningCategoryObj = cat;
+
+        if (cat && cat.restaurants.length > 0) {
+          restBox.style.display = 'block';
+          chipsEl.innerHTML = cat.restaurants.map(r => `<span class="chip">${escapeHtml(r)}</span>`).join('');
+          nextBtn.style.display = 'block';
+        } else {
+          restBox.style.display = 'block';
+          chipsEl.innerHTML = '<span style="font-size:0.82rem;color:#64748B;">ยังไม่มีร้านอาหารในหมวดนี้</span>';
+          nextBtn.style.display = 'none';
+        }
+      } else {
+        tagEl.textContent = winnerItem.categoryName ? `ร้านอาหาร (${winnerItem.categoryName})` : 'ร้านอาหารที่สุ่มได้';
+        restBox.style.display = 'none';
+        nextBtn.style.display = 'none';
+      }
+
+      modal.classList.add('open');
+    }
+
+    function spinRestaurantsInWinner() {
+      if (!winningCategoryObj) return;
+      closeModal();
+      setSpinMode('restaurant');
+      state.activeFilterCatId = winningCategoryObj.id;
+      document.getElementById('wheelCatFilter').value = winningCategoryObj.id;
+      drawWheel();
+      setTimeout(() => spinWheel(), 250);
+    }
+
+    function closeModal() {
+      document.getElementById('resultModal').classList.remove('open');
+    }
+
+    function closeModalOnBackdrop(e) {
+      if (e.target.id === 'resultModal') closeModal();
+    }
+
+    function setSpinMode(mode) {
+      if (isSpinning) return;
+      state.spinMode = mode;
+      document.getElementById('modeCatBtn').classList.toggle('active', mode === 'category');
+      document.getElementById('modeRestBtn').classList.toggle('active', mode === 'restaurant');
+      document.getElementById('restFilterBar').classList.toggle('show', mode === 'restaurant');
+      drawWheel();
+    }
+
+    function onFilterChange() {
+      state.activeFilterCatId = document.getElementById('wheelCatFilter').value;
+      drawWheel();
+    }
+
+    function setManagerTab(tab) {
+      state.managerTab = tab;
+      document.getElementById('tabRestBtn').classList.toggle('active', tab === 'restaurant');
+      document.getElementById('tabCatBtn').classList.toggle('active', tab === 'category');
+      document.getElementById('manageRestSection').style.display = tab === 'restaurant' ? 'block' : 'none';
+      document.getElementById('manageCatSection').style.display = tab === 'category' ? 'block' : 'none';
+      renderManagerList();
+    }
+
+    function syncDropdowns() {
+      const wheelFilter = document.getElementById('wheelCatFilter');
+      const managerSelect = document.getElementById('managerCatSelect');
+
+      const prevWheelVal = wheelFilter.value || 'all';
+      const prevManagerVal = managerSelect.value || state.managerCatId;
+
+      wheelFilter.innerHTML = `<option value="all">ทุกร้านอาหารทั้งหมด</option>` +
+        state.categories.map(c => `<option value="${c.id}">${escapeHtml(c.name)} (${c.restaurants.length})</option>`).join('');
+
+      managerSelect.innerHTML = state.categories.map(c =>
+        `<option value="${c.id}">หมวด: ${escapeHtml(c.name)} (${c.restaurants.length} ร้าน)</option>`
+      ).join('');
+
+      if ([...wheelFilter.options].some(o => o.value === prevWheelVal)) {
+        wheelFilter.value = prevWheelVal;
+      } else {
+        wheelFilter.value = 'all';
+        state.activeFilterCatId = 'all';
+      }
+
+      if ([...managerSelect.options].some(o => o.value === prevManagerVal)) {
+        managerSelect.value = prevManagerVal;
+      } else if (state.categories.length > 0) {
+        managerSelect.value = state.categories[0].id;
+      }
+      state.managerCatId = managerSelect.value;
+    }
+
+    function renderManagerList() {
+      const listEl = document.getElementById('itemList');
+      state.managerCatId = document.getElementById('managerCatSelect').value;
+
+      if (state.managerTab === 'category') {
+        listEl.innerHTML = state.categories.map((cat, idx) => `
+          <div class="list-item">
+            <div class="item-info">
+              <span class="color-dot" style="background:${PALETTE[idx % PALETTE.length]}"></span>
+              <span class="item-name">${escapeHtml(cat.name)}</span>
+              <span class="badge">${cat.restaurants.length} ร้าน</span>
+            </div>
+            <button class="btn-del" onclick="deleteCategory('${cat.id}')">✕</button>
+          </div>
+        `).join('');
+      } else {
+        const cat = state.categories.find(c => c.id === state.managerCatId);
+        if (!cat || cat.restaurants.length === 0) {
+          listEl.innerHTML = `<div style="text-align:center;color:#94A3B8;padding:24px 0;font-size:0.9rem;">ยังไม่มีร้านอาหารในหมวดนี้</div>`;
+          return;
+        }
+        listEl.innerHTML = cat.restaurants.map((rest, idx) => `
+          <div class="list-item">
+            <div class="item-info">
+              <span class="color-dot" style="background:${PALETTE[idx % PALETTE.length]}"></span>
+              <span class="item-name">${escapeHtml(rest)}</span>
+            </div>
+            <button class="btn-del" onclick="deleteRestaurant('${cat.id}', ${idx})">✕</button>
+          </div>
+        `).join('');
+      }
+    }
+
+    function addCategory(e) {
+      e.preventDefault();
+      const input = document.getElementById('newCatInput');
+      const name = input.value.trim();
+      if (!name) return;
+      state.categories.push({ id: 'cat-' + Date.now(), name, restaurants: [] });
+      input.value = '';
+      saveState();
+      syncDropdowns();
+      renderManagerList();
+      drawWheel();
+    }
+
+    function deleteCategory(catId) {
+      if (state.categories.length <= 2) {
+        alert('ควรมีหมวดอาหารอย่างน้อย 2 หมวดบนวงล้อครับ');
+        return;
+      }
+      state.categories = state.categories.filter(c => c.id !== catId);
+      saveState();
+      syncDropdowns();
+      renderManagerList();
+      drawWheel();
+    }
+
+    function addRestaurant(e) {
+      e.preventDefault();
+      const input = document.getElementById('newRestInput');
+      const name = input.value.trim();
+      if (!name) return;
+      const cat = state.categories.find(c => c.id === state.managerCatId);
+      if (cat) {
+        cat.restaurants.push(name);
+        input.value = '';
+        saveState();
+        syncDropdowns();
+        renderManagerList();
+        drawWheel();
+      }
+    }
+
+    function deleteRestaurant(catId, restIndex) {
+      const cat = state.categories.find(c => c.id === catId);
+      if (cat) {
+        cat.restaurants.splice(restIndex, 1);
+        saveState();
+        syncDropdowns();
+        renderManagerList();
+        drawWheel();
+      }
+    }
+
+    function resetDefaults() {
+      if (!confirm('ต้องการรีเซ็ตหมวดอาหารและร้านอาหารทั้งหมดกลับเป็นค่าเริ่มต้นใช่ไหม?')) return;
+      state.categories = JSON.parse(JSON.stringify(DEFAULT_DATA));
+      saveState();
+      syncDropdowns();
+      renderManagerList();
+      drawWheel();
+    }
+
+    /* ================= BILL SPLITTER LOGIC ================= */
+    function setSplitMode(mode) {
+      billState.splitMode = mode;
+      document.getElementById('splitEqualBtn').classList.toggle('active', mode === 'equal');
+      document.getElementById('splitItemBtn').classList.toggle('active', mode === 'itemized');
+      document.getElementById('equalSplitPanel').style.display = mode === 'equal' ? 'block' : 'none';
+      document.getElementById('itemizedSplitPanel').style.display = mode === 'itemized' ? 'block' : 'none';
+      if (mode === 'itemized') {
+        renderDiners();
+        renderDishes();
+      }
+      calculateBill();
+    }
+
+    function changeEqualPeople(delta) {
+      billState.equalPeople = Math.max(1, billState.equalPeople + delta);
+      document.getElementById('equalPeopleCount').textContent = billState.equalPeople;
+      calculateBill();
+    }
+
+    function addDiner(e) {
+      e.preventDefault();
+      const input = document.getElementById('newDinerInput');
+      const name = input.value.trim();
+      if (!name) return;
+      const newId = 'd-' + Date.now();
+      billState.diners.push({ id: newId, name });
+      // Auto include new diner in existing dishes by default or leave unchecked
+      input.value = '';
+      renderDiners();
+      renderDishes();
+      calculateBill();
+    }
+
+    function removeDiner(dinerId) {
+      if (billState.diners.length <= 1) {
+        alert('ต้องมีผู้ร่วมโต๊ะอย่างน้อย 1 คนครับ');
+        return;
+      }
+      billState.diners = billState.diners.filter(d => d.id !== dinerId);
+      billState.dishes.forEach(dish => {
+        dish.sharedBy = dish.sharedBy.filter(id => id !== dinerId);
+      });
+      renderDiners();
+      renderDishes();
+      calculateBill();
+    }
+
+    function renderDiners() {
+      document.getElementById('dinerCountLabel').textContent = billState.diners.length;
+      const list = document.getElementById('dinerTagsList');
+      list.innerHTML = billState.diners.map(d => `
+        <span class="person-pill">
+          ${escapeHtml(d.name)}
+          <button type="button" onclick="removeDiner('${d.id}')">×</button>
+        </span>
+      `).join('');
+    }
+
+    function addDish(e) {
+      e.preventDefault();
+      const nameInput = document.getElementById('dishNameInput');
+      const priceInput = document.getElementById('dishPriceInput');
+      const name = nameInput.value.trim();
+      const price = parseFloat(priceInput.value);
+      if (!name || isNaN(price) || price < 0) return;
+
+      billState.dishes.push({
+        id: 'dish-' + Date.now(),
+        name,
+        price,
+        sharedBy: billState.diners.map(d => d.id) // Default shared by all
+      });
+
+      nameInput.value = '';
+      priceInput.value = '';
+      renderDishes();
+      calculateBill();
+    }
+
+    function removeDish(dishId) {
+      billState.dishes = billState.dishes.filter(d => d.id !== dishId);
+      renderDishes();
+      calculateBill();
+    }
+
+    function toggleDishSharer(dishId, dinerId) {
+      const dish = billState.dishes.find(d => d.id === dishId);
+      if (!dish) return;
+      if (dish.sharedBy.includes(dinerId)) {
+        dish.sharedBy = dish.sharedBy.filter(id => id !== dinerId);
+      } else {
+        dish.sharedBy.push(dinerId);
+      }
+      renderDishes();
+      calculateBill();
+    }
+
+    function renderDishes() {
+      const container = document.getElementById('dishListContainer');
+      if (billState.dishes.length === 0) {
+        container.innerHTML = `<div style="text-align:center;color:#94A3B8;padding:16px 0;font-size:0.88rem;">ยังไม่มีรายการอาหาร เพิ่มเมนูด้านบนเพื่อคำนวณแยกคน</div>`;
+        return;
+      }
+
+      container.innerHTML = billState.dishes.map(dish => `
+        <div class="dish-card">
+          <div class="dish-header">
+            <span class="dish-title">${escapeHtml(dish.name)}</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="dish-price">${dish.price.toFixed(2)} ฿</span>
+              <button type="button" class="btn-del" style="width:24px;height:24px;" onclick="removeDish('${dish.id}')">✕</button>
+            </div>
+          </div>
+          <div style="font-size:0.78rem;color:#64748B;margin-bottom:6px;">เลือกคนหารเมนูนี้ (${dish.sharedBy.length} คน):</div>
+          <div class="sharer-checks">
+            ${billState.diners.map(d => {
+              const active = dish.sharedBy.includes(d.id);
+              return `<span class="sharer-chip ${active ? 'selected' : ''}" onclick="toggleDishSharer('${dish.id}', '${d.id}')">${escapeHtml(d.name)}</span>`;
+            }).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function applyTaxes(subtotal) {
+      const hasSC = document.getElementById('chkService').checked;
+      const hasVat = document.getElementById('chkVat').checked;
+      const sc = hasSC ? subtotal * 0.10 : 0;
+      const vat = hasVat ? (subtotal + sc) * 0.07 : 0;
+      return { subtotal, sc, vat, grandTotal: subtotal + sc + vat };
+    }
+
+    let lastBillSummaryText = '';
+
+    function calculateBill() {
+      const shopName = document.getElementById('billShopName').value.trim() || 'สรุปค่าอาหาร';
+      const breakdownEl = document.getElementById('billBreakdownArea');
+      const mainLabelEl = document.getElementById('summaryMainLabel');
+      const mainAmountEl = document.getElementById('summaryMainAmount');
+      const totalSubEl = document.getElementById('summaryTotalSub');
+
+      if (billState.splitMode === 'equal') {
+        const rawSub = parseFloat(document.getElementById('equalSubtotal').value) || 0;
+        const { subtotal, sc, vat, grandTotal } = applyTaxes(rawSub);
+        const perPerson = grandTotal / billState.equalPeople;
+
+        mainLabelEl.textContent = `ยอดหารเฉลี่ยต่อคน (${billState.equalPeople} คน)`;
+        mainAmountEl.textContent = `${perPerson.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿`;
+        totalSubEl.textContent = `ยอดสุทธิรวมทั้งบิล: ${grandTotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿`;
+
+        breakdownEl.innerHTML = `
+          <div class="breakdown-row"><span>ค่าอาหาร (Subtotal)</span><span>${subtotal.toFixed(2)} ฿</span></div>
+          ${sc > 0 ? `<div class="breakdown-row"><span>Service Charge (10%)</span><span>${sc.toFixed(2)} ฿</span></div>` : ''}
+          ${vat > 0 ? `<div class="breakdown-row"><span>VAT (7%)</span><span>${vat.toFixed(2)} ฿</span></div>` : ''}
+          <div class="breakdown-row" style="font-weight:700;"><span>รวมสุทธิ (${billState.equalPeople} คน)</span><span>${grandTotal.toFixed(2)} ฿</span></div>
+        `;
+
+        lastBillSummaryText = `🧾 ${shopName}\n` +
+          `ยอดรวมทั้งหมด: ${grandTotal.toFixed(2)} บาท\n` +
+          `จำนวนคนหาร: ${billState.equalPeople} คน\n` +
+          `💰 ตกคนละ: ${perPerson.toFixed(2)} บาท`;
+
+      } else {
+        // Itemized calculation
+        const personSubtotals = {};
+        billState.diners.forEach(d => personSubtotals[d.id] = 0);
+
+        let totalSubtotal = 0;
+        billState.dishes.forEach(dish => {
+          totalSubtotal += dish.price;
+          if (dish.sharedBy.length > 0) {
+            const share = dish.price / dish.sharedBy.length;
+            dish.sharedBy.forEach(dId => {
+              if (personSubtotals[dId] !== undefined) {
+                personSubtotals[dId] += share;
+              }
+            });
+          }
+        });
+
+        const { subtotal, sc, vat, grandTotal } = applyTaxes(totalSubtotal);
+        const taxMultiplier = subtotal > 0 ? (grandTotal / subtotal) : 1;
+
+        mainLabelEl.textContent = `ยอดสุทธิรวม (${billState.diners.length} คน)`;
+        mainAmountEl.textContent = `${grandTotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿`;
+        totalSubEl.textContent = `ค่าอาหาร ${subtotal.toFixed(2)} ฿ + ภาษี/บริการ ${(sc + vat).toFixed(2)} ฿`;
+
+        let rowsHtml = '';
+        let copyLines = [`🧾 ${shopName} (ยอดรวม ${grandTotal.toFixed(2)} บาท)`];
+
+        billState.diners.forEach(d => {
+          const finalPersonAmount = personSubtotals[d.id] * taxMultiplier;
+          rowsHtml += `<div class="breakdown-row"><span>${escapeHtml(d.name)}</span><span style="font-weight:700;color:#2563EB;">${finalPersonAmount.toFixed(2)} ฿</span></div>`;
+          copyLines.push(`• ${d.name}: ${finalPersonAmount.toFixed(2)} บาท`);
+        });
+
+        breakdownEl.innerHTML = rowsHtml;
+        lastBillSummaryText = copyLines.join('\n');
+      }
+    }
+
+    function copyBillSummary() {
+      navigator.clipboard.writeText(lastBillSummaryText).then(() => {
+        const btn = document.getElementById('copyBillBtn');
+        const orig = btn.textContent;
+        btn.textContent = 'คัดลอกเรียบร้อย! วางในแชตได้เลย';
+        setTimeout(() => btn.textContent = orig, 2200);
+      });
+    }
+
+    function resetBill() {
+      document.getElementById('billShopName').value = '';
+      document.getElementById('equalSubtotal').value = '';
+      document.getElementById('chkService').checked = false;
+      document.getElementById('chkVat').checked = false;
+      billState.dishes = [];
+      renderDishes();
+      calculateBill();
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[m]));
+    }
+
+    // Initialize
+    loadState();
+    syncDropdowns();
+    renderManagerList();
+    drawWheel();
+    renderDiners();
+    calculateBill();
+  </script>
+</body>
+</html>
