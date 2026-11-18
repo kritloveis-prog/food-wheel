@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>วงล้อสุ่มอาหาร เซียมซีของหวาน & หารบิล</title>
+  <title>วงล้อสุ่มอาหาร เซียมซีของหวาน & สแกนบิลหารเงิน</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -409,7 +409,6 @@
       user-select: none;
     }
 
-    /* Bamboo Sticks inside cylinder */
     .sticks-bundle {
       position: absolute;
       bottom: 65px;
@@ -450,14 +449,12 @@
     .stick:nth-child(5) { transform: rotate(11deg); }
     .stick:nth-child(6) { transform: rotate(17deg) translateY(5px); }
 
-    /* Winning Stick Pop-out */
     .stick.winner-pop {
       transform: rotate(0deg) translateY(-34px) scale(1.12) !important;
       z-index: 4;
       box-shadow: 0 0 14px rgba(234, 67, 53, 0.55);
     }
 
-    /* Red & Gold Siamsi Cylinder */
     .cylinder-body {
       position: relative;
       width: 104px;
@@ -515,16 +512,9 @@
       transition: transform 0.15s ease;
     }
 
-    .siamsi-btn:hover:not(:disabled) {
-      transform: translateY(-2px);
-    }
+    .siamsi-btn:hover:not(:disabled) { transform: translateY(-2px); }
+    .siamsi-btn:disabled { opacity: 0.65; cursor: not-allowed; }
 
-    .siamsi-btn:disabled {
-      opacity: 0.65;
-      cursor: not-allowed;
-    }
-
-    /* Siamsi Result Paper Slip */
     .siamsi-slip {
       display: none;
       width: 100%;
@@ -537,9 +527,7 @@
       animation: popIn 0.3s ease;
     }
 
-    .siamsi-slip.show {
-      display: block;
-    }
+    .siamsi-slip.show { display: block; }
 
     .slip-number {
       display: inline-block;
@@ -552,20 +540,8 @@
       margin-bottom: 6px;
     }
 
-    .slip-shop-name {
-      font-size: 1.45rem;
-      font-weight: 700;
-      color: #1E293B;
-      margin-bottom: 4px;
-    }
-
-    .slip-category {
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: #B45309;
-      margin-bottom: 8px;
-    }
-
+    .slip-shop-name { font-size: 1.45rem; font-weight: 700; color: #1E293B; margin-bottom: 4px; }
+    .slip-category { font-size: 0.82rem; font-weight: 600; color: #B45309; margin-bottom: 8px; }
     .slip-fortune {
       font-size: 0.88rem;
       color: #78350F;
@@ -619,18 +595,8 @@
       border-bottom-color: var(--blue);
     }
 
-    .add-form {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 14px;
-    }
-
-    .add-form-stack {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 14px;
-    }
+    .add-form { display: flex; gap: 8px; margin-bottom: 14px; }
+    .add-form-stack { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
 
     .btn-add {
       padding: 10px 14px;
@@ -665,25 +631,9 @@
       gap: 8px;
     }
 
-    .item-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 0;
-      flex: 1;
-    }
-
-    .color-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    .item-name {
-      font-weight: 500;
-      word-break: break-word;
-    }
+    .item-info { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
+    .color-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .item-name { font-weight: 500; word-break: break-word; }
 
     .badge {
       font-size: 0.72rem;
@@ -694,22 +644,10 @@
       white-space: nowrap;
     }
 
-    .badge.coffee {
-      background: #FEF3C7;
-      color: #92400E;
-    }
+    .badge.coffee { background: #FEF3C7; color: #92400E; }
+    .badge.dessert { background: #FCE7F3; color: #9D174D; }
 
-    .badge.dessert {
-      background: #FCE7F3;
-      color: #9D174D;
-    }
-
-    .item-actions {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
-    }
+    .item-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 
     .btn-map-link {
       display: inline-flex;
@@ -725,11 +663,7 @@
       text-decoration: none;
     }
 
-    .btn-map-link.custom {
-      background: #ECFDF5;
-      color: var(--green);
-      border-color: #A7F3D0;
-    }
+    .btn-map-link.custom { background: #ECFDF5; color: var(--green); border-color: #A7F3D0; }
 
     .btn-del {
       border: none;
@@ -775,18 +709,8 @@
       margin-bottom: 14px;
     }
 
-    .share-box h4 {
-      font-size: 0.92rem;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-
-    .share-box p {
-      font-size: 0.82rem;
-      color: var(--muted);
-      margin-bottom: 10px;
-      line-height: 1.45;
-    }
+    .share-box h4 { font-size: 0.92rem; font-weight: 700; margin-bottom: 6px; }
+    .share-box p { font-size: 0.82rem; color: var(--muted); margin-bottom: 10px; line-height: 1.45; }
 
     .btn-share-action {
       width: 100%;
@@ -801,7 +725,7 @@
     .btn-export { background: var(--blue); color: #FFFFFF; }
     .btn-import { background: var(--green); color: #FFFFFF; margin-top: 8px; }
 
-    /* Bill Splitter Styles */
+    /* ================= RECEIPT SCANNER & BILL SPLITTER ================= */
     .bill-grid {
       display: grid;
       grid-template-columns: 1.1fr 0.9fr;
@@ -811,6 +735,123 @@
 
     @media (max-width: 860px) {
       .bill-grid { grid-template-columns: 1fr; }
+    }
+
+    .scanner-box {
+      background: linear-gradient(135deg, #EFF6FF 0%, #F0FDF4 100%);
+      border: 2px dashed #93C5FD;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 18px;
+      text-align: center;
+    }
+
+    .scanner-box h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1E3A8A;
+      margin-bottom: 4px;
+    }
+
+    .scanner-box p {
+      font-size: 0.82rem;
+      color: #475569;
+      margin-bottom: 12px;
+    }
+
+    .scan-btn-group {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-scan-trigger {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 11px 18px;
+      border: none;
+      border-radius: 12px;
+      background: var(--blue);
+      color: #FFFFFF;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(66, 133, 244, 0.25);
+    }
+
+    .btn-scan-trigger.gallery {
+      background: #FFFFFF;
+      color: var(--blue);
+      border: 1.5px solid #BFDBFE;
+      box-shadow: none;
+    }
+
+    .scan-preview-area {
+      display: none;
+      margin-top: 12px;
+      text-align: center;
+    }
+
+    .scan-preview-area.show {
+      display: block;
+    }
+
+    .scan-preview-img {
+      max-height: 160px;
+      max-width: 100%;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin-bottom: 8px;
+    }
+
+    .scan-progress-wrap {
+      width: 100%;
+      background: #E2E8F0;
+      height: 8px;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 8px 0 4px;
+    }
+
+    .scan-progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--blue), var(--green));
+      transition: width 0.2s ease;
+    }
+
+    .scan-status-text {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--blue);
+    }
+
+    .raw-ocr-toggle {
+      margin-top: 8px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      background: none;
+      border: none;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .raw-ocr-box {
+      display: none;
+      margin-top: 8px;
+      padding: 10px;
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.78rem;
+      text-align: left;
+      white-space: pre-wrap;
+      max-height: 140px;
+      overflow-y: auto;
+      color: #334155;
     }
 
     .section-title {
@@ -831,12 +872,7 @@
       margin-bottom: 6px;
     }
 
-    .people-counter {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
+    .people-counter { display: flex; align-items: center; gap: 12px; }
     .counter-btn {
       width: 40px;
       height: 40px;
@@ -849,20 +885,9 @@
       color: var(--blue);
     }
 
-    .counter-val {
-      font-size: 1.2rem;
-      font-weight: 700;
-      min-width: 40px;
-      text-align: center;
-    }
+    .counter-val { font-size: 1.2rem; font-weight: 700; min-width: 40px; text-align: center; }
 
-    .tax-toggles {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 14px;
-    }
-
+    .tax-toggles { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
     .toggle-pill {
       display: flex;
       align-items: center;
@@ -879,13 +904,7 @@
 
     .toggle-pill input { accent-color: var(--blue); width: 16px; height: 16px; }
 
-    .people-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-bottom: 12px;
-    }
-
+    .people-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
     .person-pill {
       display: inline-flex;
       align-items: center;
@@ -1097,14 +1116,14 @@
 <body>
 
   <header>
-    <h1>มื้อนี้กินอะไรดี เซียมซีของหวาน & หารบิล</h1>
-    <p>สุ่มอาหารคาว เสี่ยงเซียมซีร้านกาแฟ/ของหวาน เปิด Google Maps และหารค่าใช้จ่าย</p>
+    <h1>มื้อนี้กินอะไรดี เซียมซีของหวาน & สแกนบิล</h1>
+    <p>สุ่มอาหารคาว เสี่ยงเซียมซีร้านกาแฟ/ของหวาน สแกนใบเสร็จ และหารบิลตามคน</p>
     <div class="sync-badge" id="syncStatusBadge">⏳ กำลังเชื่อมต่อฐานข้อมูล...</div>
   </header>
 
   <nav class="main-nav">
     <button class="nav-btn active" id="navWheelBtn" onclick="switchMainView('wheel')">วงล้อ & เซียมซี</button>
-    <button class="nav-btn" id="navBillBtn" onclick="switchMainView('bill')">คำนวณบิล / หารเงิน</button>
+    <button class="nav-btn" id="navBillBtn" onclick="switchMainView('bill')">สแกนบิล / หารเงิน</button>
   </nav>
 
   <!-- VIEW 1: SPINNER WHEEL + SIAMSI -->
@@ -1264,10 +1283,38 @@
     </div>
   </main>
 
-  <!-- VIEW 2: BILL SPLITTER -->
+  <!-- VIEW 2: RECEIPT SCANNER & BILL SPLITTER -->
   <section class="view-section" id="billView">
     <div class="bill-grid">
       <div class="card">
+        <!-- Receipt OCR Scanner Box -->
+        <div class="scanner-box">
+          <h3>📸 สแกนใบเสร็จอัตโนมัติ (OCR)</h3>
+          <p>ถ่ายรูปบิลหลังทานเสร็จ ระบบจะดึงยอดรวมและรายการอาหารมาคำนวณให้ทันที</p>
+          <div class="scan-btn-group">
+            <label class="btn-scan-trigger">
+              📷 ถ่ายรูปใบเสร็จ
+              <input type="file" id="cameraReceiptInput" accept="image/*" capture="environment" style="display:none;" onchange="handleReceiptUpload(event)" />
+            </label>
+            <label class="btn-scan-trigger gallery">
+              🖼️ เลือกรูปจากเครื่อง
+              <input type="file" id="galleryReceiptInput" accept="image/*" style="display:none;" onchange="handleReceiptUpload(event)" />
+            </label>
+          </div>
+
+          <div class="scan-preview-area" id="scanPreviewArea">
+            <img id="receiptPreviewImg" class="scan-preview-img" alt="ตัวอย่างใบเสร็จ" />
+            <div class="scan-progress-wrap">
+              <div class="scan-progress-bar" id="scanProgressBar"></div>
+            </div>
+            <div class="scan-status-text" id="scanStatusText">กำลังอ่านข้อความจากใบเสร็จ...</div>
+            <button type="button" class="raw-ocr-toggle" id="toggleRawOcrBtn" style="display:none;" onclick="toggleRawOcrText()">
+              ดูข้อความดิบที่สแกนได้
+            </button>
+            <div class="raw-ocr-box" id="rawOcrBox"></div>
+          </div>
+        </div>
+
         <div class="mode-switch">
           <button class="mode-btn active" id="splitEqualBtn" onclick="setSplitMode('equal')">หารเท่ากันทุกคน</button>
           <button class="mode-btn" id="splitItemBtn" onclick="setSplitMode('itemized')">แยกตามรายการสั่ง</button>
@@ -1376,12 +1423,14 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <!-- Tesseract.js OCR Engine (Thai + English) -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
   <script>
     const FIREBASE_DB_URL = "https://food-wheel-db-default-rtdb.asia-southeast1.firebasedatabase.app/";
 
     const PALETTE = ['#4285F4', '#EA4335', '#FBBC05', '#34A853'];
-    const STORAGE_KEY = 'thai_food_wheel_v6';
+    const STORAGE_KEY = 'thai_food_wheel_v7';
 
     const DEFAULT_DATA = [
       { id: 'cat-1', name: 'อาหารตามสั่ง', restaurants: [{ name: 'ร้านป้าณี', mapUrl: '' }, { name: 'ครัวลุงหนวด', mapUrl: '' }] },
@@ -1424,7 +1473,7 @@
       desserts: [],
       spinMode: 'category',
       activeFilterCatId: 'all',
-      siamsiFilter: 'all', // 'all' | 'coffee' | 'dessert'
+      siamsiFilter: 'all',
       managerTab: 'restaurant',
       managerCatId: 'cat-1',
       soundEnabled: true
@@ -1437,7 +1486,153 @@
     let lastWinnerLabel = '';
     let dbRef = null;
 
-    /* ================= FIREBASE REALTIME SYNC (SAFE MERGE) ================= */
+    /* ================= RECEIPT OCR SCANNER LOGIC ================= */
+    async function handleReceiptUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const previewArea = document.getElementById('scanPreviewArea');
+      const previewImg = document.getElementById('receiptPreviewImg');
+      const progressBar = document.getElementById('scanProgressBar');
+      const statusText = document.getElementById('scanStatusText');
+      const toggleRawBtn = document.getElementById('toggleRawOcrBtn');
+      const rawOcrBox = document.getElementById('rawOcrBox');
+
+      previewArea.classList.add('show');
+      previewImg.src = URL.createObjectURL(file);
+      progressBar.style.width = '10%';
+      statusText.style.color = '#4285F4';
+      statusText.textContent = 'กำลังเตรียมระบบอ่านภาษาไทย/อังกฤษ...';
+      toggleRawBtn.style.display = 'none';
+      rawOcrBox.style.display = 'none';
+
+      try {
+        const result = await Tesseract.recognize(file, 'tha+eng', {
+          logger: m => {
+            if (m.status === 'recognizing text') {
+              const pct = Math.round(m.progress * 100);
+              progressBar.style.width = `${Math.max(15, pct)}%`;
+              statusText.textContent = `กำลังอ่านตัวเลขบนใบเสร็จ... ${pct}%`;
+            }
+          }
+        });
+
+        const text = result.data.text || '';
+        rawOcrBox.textContent = text;
+        toggleRawOcrBtn.style.display = 'inline-block';
+
+        const parsed = parseReceiptText(text);
+
+        // Auto-fill shop name if empty and detected
+        const shopInput = document.getElementById('billShopName');
+        if (!shopInput.value.trim() && parsed.shopName) {
+          shopInput.value = parsed.shopName;
+        }
+
+        // Fill Equal Split Subtotal / Total
+        if (parsed.grandTotal > 0) {
+          document.getElementById('equalSubtotal').value = parsed.grandTotal.toFixed(2);
+          // Uncheck SC & VAT by default because grandTotal on receipt already includes them
+          document.getElementById('chkService').checked = false;
+          document.getElementById('chkVat').checked = false;
+        }
+
+        // Fill Itemized Dishes if found
+        if (parsed.items.length > 0) {
+          billState.dishes = parsed.items.map((item, idx) => ({
+            id: 'dish-' + Date.now() + '-' + idx,
+            name: item.name,
+            price: item.price,
+            sharedBy: billState.diners.map(d => d.id)
+          }));
+          renderDishes();
+        }
+
+        calculateBill();
+
+        progressBar.style.width = '100%';
+        statusText.style.color = '#34A853';
+        statusText.textContent = `✅ สแกนสำเร็จ! พบ ${parsed.items.length} รายการ | ยอดรวม ${parsed.grandTotal.toFixed(2)} ฿`;
+      } catch (err) {
+        console.error('OCR Error:', err);
+        statusText.style.color = '#EA4335';
+        statusText.textContent = '❌ อ่านภาพไม่สำเร็จ กรุณาลองถ่ายให้ชัดและสว่างขึ้นครับ';
+      } finally {
+        event.target.value = '';
+      }
+    }
+
+    function parseReceiptText(rawText) {
+      const lines = rawText
+        .split('\n')
+        .map(l => l.trim())
+        .filter(l => l.length > 1);
+
+      let shopName = '';
+      if (lines.length > 0 && !/\d{2,}/.test(lines[0])) {
+        shopName = lines[0].slice(0, 40);
+      }
+
+      const ignoreKeywords = /total|subtotal|sub total|vat|tax|service|change|cash|qr|promptpay|discount|net|รวม|สุทธิ|ภาษี|เงินทอน|รับเงิน|ส่วนลด|ยอดรวม|ทั้งสิ้น|ค่าบริการ/i;
+      const totalKeywords = /grand total|net total|total|amount due|ยอดสุทธิ|รวมทั้งสิ้น|ยอดรวมสุทธิ|รวมเงิน|ยอดชำระ|รวมทั้งหมด/i;
+      const subtotalKeywords = /subtotal|sub total|รวมค่าอาหาร|ยอดก่อนภาษี/i;
+
+      let detectedGrandTotal = 0;
+      let detectedSubtotal = 0;
+      let allDetectedPrices = [];
+      const extractedItems = [];
+
+      lines.forEach(line => {
+        // Match price pattern like 120.00, 1,250.50, or 85.- at the end of line
+        const priceMatch = line.match(/(\d{1,3}(?:,\d{3})*(?:\.\d{2})|\d+(?:\.\d{2}))\s*(?:บาท|฿|THB|\.-)?\s*$/i);
+        if (!priceMatch) return;
+
+        const numericVal = parseFloat(priceMatch[1].replace(/,/g, ''));
+        if (isNaN(numericVal) || numericVal <= 0 || numericVal > 500000) return;
+
+        allDetectedPrices.push(numericVal);
+
+        if (totalKeywords.test(line)) {
+          if (numericVal >= detectedGrandTotal) {
+            detectedGrandTotal = numericVal;
+          }
+        } else if (subtotalKeywords.test(line)) {
+          detectedSubtotal = numericVal;
+        } else if (!ignoreKeywords.test(line)) {
+          // Extract item name before the price
+          let itemName = line.slice(0, priceMatch.index).trim();
+          // Remove leading quantity like "1 ", "2x ", "1 x "
+          itemName = itemName.replace(/^(\d+\s*[xX*]?\s*)/, '').trim();
+          if (itemName.length >= 2) {
+            extractedItems.push({ name: itemName, price: numericVal });
+          }
+        }
+      });
+
+      // Fallback if no explicit "Total" keyword matched: use highest number on receipt or sum of items
+      if (detectedGrandTotal === 0) {
+        if (detectedSubtotal > 0) {
+          detectedGrandTotal = detectedSubtotal;
+        } else if (allDetectedPrices.length > 0) {
+          detectedGrandTotal = Math.max(...allDetectedPrices);
+        } else if (extractedItems.length > 0) {
+          detectedGrandTotal = extractedItems.reduce((sum, it) => sum + it.price, 0);
+        }
+      }
+
+      return {
+        shopName,
+        grandTotal: detectedGrandTotal,
+        items: extractedItems
+      };
+    }
+
+    function toggleRawOcrText() {
+      const box = document.getElementById('rawOcrBox');
+      box.style.display = box.style.display === 'block' ? 'none' : 'block';
+    }
+
+    /* ================= FIREBASE REALTIME SYNC ================= */
     function initCloudSync() {
       const badge = document.getElementById('syncStatusBadge');
       const footerNote = document.getElementById('footerSyncNote');
@@ -1465,7 +1660,6 @@
           }
         });
 
-        // Listen for changes from cloud without overwriting cloud with local defaults
         dbRef.on('value', (snapshot) => {
           const remoteData = snapshot.val();
           if (remoteData) {
@@ -1624,7 +1818,6 @@
       slip.classList.remove('show');
       cylinder.classList.add('shaking');
 
-      // Play rhythmic bamboo rattle sounds during shake
       const shakeInterval = setInterval(() => {
         playBambooShakeSound();
       }, 140);
@@ -1802,7 +1995,7 @@
 
     function loadLocalState() {
       try {
-        const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('thai_food_wheel_v5') || localStorage.getItem('thai_food_wheel_v4');
+        const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('thai_food_wheel_v6') || localStorage.getItem('thai_food_wheel_v5');
         if (saved) {
           const parsed = JSON.parse(saved);
           if (typeof parsed.soundEnabled === 'boolean') {
@@ -2387,7 +2580,7 @@
     function renderDishes() {
       const container = document.getElementById('dishListContainer');
       if (billState.dishes.length === 0) {
-        container.innerHTML = `<div style="text-align:center;color:#94A3B8;padding:16px 0;font-size:0.88rem;">ยังไม่มีรายการอาหาร เพิ่มเมนูด้านบนเพื่อคำนวณแยกคน</div>`;
+        container.innerHTML = `<div style="text-align:center;color:#94A3B8;padding:16px 0;font-size:0.88rem;">ยังไม่มีรายการอาหาร เพิ่มเมนูด้านบนหรือสแกนใบเสร็จได้เลย</div>`;
         return;
       }
 
@@ -2499,6 +2692,7 @@
       document.getElementById('equalSubtotal').value = '';
       document.getElementById('chkService').checked = false;
       document.getElementById('chkVat').checked = false;
+      document.getElementById('scanPreviewArea').classList.remove('show');
       billState.dishes = [];
       renderDishes();
       calculateBill();
